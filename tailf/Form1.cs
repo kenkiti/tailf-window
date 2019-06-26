@@ -14,7 +14,27 @@ namespace tailf
             textBox1.Text = @"\\MARKETSPEED005\log\" + DateTime.Now.ToString("yyyyMMdd") + "cs.txt";
         }
 
-        private void Tail(string filename)
+        private void TailToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string path = textBox1.Text;
+            richTextBox1.AppendText(path+Environment.NewLine);
+
+            if (File.Exists(path))
+            {
+                Task.Run(() => Tailf(textBox1.Text));
+            } else
+            {
+                richTextBox1.AppendText("File not found.");
+            }
+
+        }
+
+
+        /// <summary>
+        /// ネットワーク上のファイルを監視する
+        /// </summary>
+        /// <param name="filename">ファイルパス</param>
+        private void Tailf(string filename)
         {
             FileInfo fi = new FileInfo(filename);
             using (FileStream stream = fi.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -38,7 +58,7 @@ namespace tailf
                             richTextBox1.AppendText(Encoding.GetEncoding("sjis").GetString(al));
                         }));
                     };
-                    fw.InternalBufferSize = 4*4096;
+                    fw.InternalBufferSize = 4 * 4096;
                     fw.NotifyFilter = NotifyFilters.Size | NotifyFilters.LastWrite | NotifyFilters.LastAccess;
                     fw.Changed += new FileSystemEventHandler(ReadText);
                     fw.EnableRaisingEvents = true;
@@ -47,19 +67,5 @@ namespace tailf
             }
         }
 
-        private void TailToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            string path = textBox1.Text;
-            richTextBox1.AppendText(path+Environment.NewLine);
-
-            if (File.Exists(path))
-            {
-                Task.Run(() => Tail(textBox1.Text));
-            } else
-            {
-                richTextBox1.AppendText("File not found.");
-            }
-
-        }
     }
 }
